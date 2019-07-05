@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">483539294039-3bs93heep97k10mbhvoga7elu28g5f79.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://recordingsapp-e3134.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">483539294039</string>
+    <string name="google_api_key" translatable="false">AIzaSyAviXdGgTPrMHDRxoM0hgEugzwBfmcStj8</string>
+    <string name="google_app_id" translatable="false">1:483539294039:android:de73feb21ae16866</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAviXdGgTPrMHDRxoM0hgEugzwBfmcStj8</string>
+    <string name="google_storage_bucket" translatable="false">recordingsapp-e3134.appspot.com</string>
+    <string name="project_id" translatable="false">recordingsapp-e3134</string>
+</resources>

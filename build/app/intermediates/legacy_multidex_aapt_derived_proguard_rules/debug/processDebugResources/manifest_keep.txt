@@ -1,0 +1,2 @@
+# Referenced at F:\Recording App Project\recording_app\build\app\intermediates\merged_manifests\debug\processDebugManifest\merged\AndroidManifest.xml:30
+-keep class io.flutter.app.FlutterApplication { <init>(...); }
