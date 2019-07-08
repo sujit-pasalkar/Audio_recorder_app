@@ -8,6 +8,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 
 class Recording extends StatefulWidget {
@@ -174,14 +175,14 @@ class _RecordingState extends State<Recording> {
                                               ),
                                             ),
                                             GestureDetector(
-                                              onTap: _isPlaying ? () {
-                                                print('pause and resume');
-                                                pausePlayer();
-                                              }
-                                              :
-                                              (){
-                                                startPlayer();
-                                              },
+                                              onTap: _isPlaying
+                                                  ? () {
+                                                      print('pause and resume');
+                                                      pausePlayer();
+                                                    }
+                                                  : () {
+                                                      startPlayer();
+                                                    },
                                               child: Container(
                                                 padding: EdgeInsets.all(8),
                                                 decoration: BoxDecoration(
@@ -387,11 +388,24 @@ class _RecordingState extends State<Recording> {
                     style: TextStyle(
                       color: Color(0xffb00bae3),
                     )),
-                onPressed: () {
-                  File('storage/emulated/0/default.m4a').deleteSync();
-                  setState(() {});
-                  startRecorder();
-                  Navigator.pop(context);
+                onPressed: () async {
+                  final writeExternalStorage =
+                      await SimplePermissions.checkPermission(
+                          Permission.WriteExternalStorage);
+                  print('result writeExternalStorage : $writeExternalStorage');
+
+                  if (!writeExternalStorage) {
+                    final writeExternalStorage =
+                        await SimplePermissions.requestPermission(
+                            Permission.WriteExternalStorage);
+                    print(
+                        'result writeExternalStorage : $writeExternalStorage');
+                  } else {
+                    File('storage/emulated/0/default.m4a').deleteSync();
+                    setState(() {});
+                    startRecorder();
+                    Navigator.pop(context);
+                  }
                 },
               )
             ],
@@ -422,13 +436,26 @@ class _RecordingState extends State<Recording> {
                     style: TextStyle(
                       color: Color(0xffb00bae3),
                     )),
-                onPressed: () {
-                  File('storage/emulated/0/default.m4a').deleteSync();
-                  setState(() {
-                    _playerTxt = '00:00:00';
-                    _recorderTxt = '00:00:00';
-                  });
-                  Navigator.pop(context);
+                onPressed: () async {
+                  final writeExternalStorage =
+                      await SimplePermissions.checkPermission(
+                          Permission.WriteExternalStorage);
+                  print('result writeExternalStorage : $writeExternalStorage');
+
+                  if (!writeExternalStorage) {
+                    final writeExternalStorage =
+                        await SimplePermissions.requestPermission(
+                            Permission.WriteExternalStorage);
+                    print(
+                        'result writeExternalStorage : $writeExternalStorage');
+                  } else {
+                    File('storage/emulated/0/default.m4a').deleteSync();
+                    setState(() {
+                      _playerTxt = '00:00:00';
+                      _recorderTxt = '00:00:00';
+                    });
+                    Navigator.pop(context);
+                  }
                 },
               )
             ],
@@ -585,36 +612,43 @@ class _RecordingState extends State<Recording> {
 
   // player
   void startPlayer() async {
-    String path = await _flutterSound.startPlayer(
-      // '/storage/emulated/0/myRecordings/1562241107889.m4a'
-      null
-      );
-    await _flutterSound.setVolume(1.0);
-    print('startPlayer: $path');
-
     try {
-      _playerSubscription = _flutterSound.onPlayerStateChanged.listen((e) {
-        if (e != null) {
-          slider_current_position = e.currentPosition;
-          max_duration = e.duration;
+      final recordAudio =
+          await SimplePermissions.checkPermission(Permission.RecordAudio);
+      print('result writeExternalStorage : $recordAudio');
 
-          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
-              e.currentPosition.toInt(),
-              isUtc: true);
-          String txt = DateFormat('mm:ss:SS', 'en_GB').format(date);
-          this.setState(() {
-            this._isPlaying = true;
-            this._playerTxt = txt.substring(0, 8);
-          });
-        }
-        else{
-          setState(() {
-           this._isPlaying = true; 
-          });
-        }
-      });
+      if (!recordAudio) {
+        final result =
+            await SimplePermissions.requestPermission(Permission.RecordAudio);
+        print('result writeExternalStorage : $result');
+      } else {
+        String path = await _flutterSound.startPlayer(null);
+        await _flutterSound.setVolume(1.0);
+        print('startPlayer: $path');
+
+        _playerSubscription = _flutterSound.onPlayerStateChanged.listen((e) {
+          if (e != null) {
+            slider_current_position = e.currentPosition;
+            max_duration = e.duration;
+
+            DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+                e.currentPosition.toInt(),
+                isUtc: true);
+            String txt = DateFormat('mm:ss:SS', 'en_GB').format(date);
+            this.setState(() {
+              this._isPlaying = true;
+              this._playerTxt = txt.substring(0, 8);
+            });
+          } else {
+            setState(() {
+              this._isPlaying = true;
+            });
+          }
+        });
+      }
     } catch (err) {
       print('start player error: $err');
+      stopPlayer();
     }
   }
 

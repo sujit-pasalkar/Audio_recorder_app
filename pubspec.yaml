@@ -31,6 +31,8 @@ dependencies:
   # fluttertoast: ^2.2.6
   qr_flutter: ^2.1.0+55
   barcode_scan: ^0.0.8
+  simple_permissions: ^0.1.9
+  # share_extend: ^1.0.3
 
 
 dev_dependencies:

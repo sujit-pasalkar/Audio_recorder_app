@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:recording_app/scanner.dart';
+// import 'package:recording_app/scanner.dart';
+import 'package:simple_permissions/simple_permissions.dart';
 
 import 'qrCode.dart';
 import 'recording.dart';
@@ -53,230 +54,244 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text('Recordings'),
-      ),
-      body: _isPlaying
-          ? Container(
-              width: double.maxFinite,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                  colors: [Color(0xffb578de3), Color(0xffb1976d2)],
+    return WillPopScope(
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text('Recordings'),
+        ),
+        body: _isPlaying
+            ? Container(
+                width: double.maxFinite,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerRight,
+                    end: Alignment.centerLeft,
+                    colors: [Color(0xffb578de3), Color(0xffb1976d2)],
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.keyboard_voice,
-                          color: Colors.white,
-                        ),
-                        // Text(
-                        //   'Last recorded..',
-                        //   style: TextStyle(fontSize: 15, color: Colors.white),
-                        //   textAlign: TextAlign.center,
-                        // ),
-                        Text(
-                          _playerTxt,
-                          style: TextStyle(fontSize: 20, color: Colors.white),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.keyboard_voice,
+                            color: Colors.white,
+                          ),
+                          Text(
+                            _playerTxt,
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Slider(
-                      value: slider_current_position,
-                      min: 0.0,
-                      max: max_duration,
-                      activeColor: Colors.white,
-                      inactiveColor: Color(0xffb4fcce0),
-                      onChanged: (double value) async {
-                        await _flutterSound.seekToPlayer(value.toInt());
-                      },
-                      divisions: max_duration.toInt()),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        top: 1.0, left: 60, right: 60, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        GestureDetector(
-                          onTap: () {
-                            print('start');
-                            // startPlayer();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.white),
-                            child: Icon(
-                              Icons.play_arrow,
-                              color: Colors.blueAccent,
-                              size: 30,
+                    Slider(
+                        value: slider_current_position,
+                        min: 0.0,
+                        max: max_duration,
+                        activeColor: Colors.white,
+                        inactiveColor: Color(0xffb4fcce0),
+                        onChanged: (double value) async {
+                          await _flutterSound.seekToPlayer(value.toInt());
+                        },
+                        divisions: max_duration.toInt()),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 1.0, left: 60, right: 60, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () {
+                              print('start');
+                              // playRecording();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.white),
+                              child: Icon(
+                                Icons.play_arrow,
+                                color: Colors.blueAccent,
+                                size: 30,
+                              ),
                             ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            print('pause and resume');
-                            pausePlayer();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.white),
-                            child: Icon(
-                              Icons.pause,
-                              color: Colors.blueAccent,
-                              size: 30,
+                          GestureDetector(
+                            onTap: () {
+                              print('pause and resume');
+                              pausePlayer();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.white),
+                              child: Icon(
+                                Icons.pause,
+                                color: Colors.blueAccent,
+                                size: 30,
+                              ),
                             ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            print('stop');
-                            stopPlayer();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.white),
-                            child: Icon(
-                              Icons.stop,
-                              color: Colors.blueAccent,
-                              size: 30,
+                          GestureDetector(
+                            onTap: () {
+                              print('stop');
+                              stopPlayer();
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle, color: Colors.white),
+                              child: Icon(
+                                Icons.stop,
+                                color: Colors.blueAccent,
+                                size: 30,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          : StreamBuilder<QuerySnapshot>(
-              stream: Firestore.instance.collection('Recordings').snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+                  ],
+                ),
+              )
+            : StreamBuilder<QuerySnapshot>(
+                stream: Firestore.instance.collection('Recordings').snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError)
+                    return Text('Error: ${snapshot.error}');
 
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                    return Center(
-                        child: CircularProgressIndicator(
-                            valueColor: new AlwaysStoppedAnimation<Color>(
-                                Color(0xffb00bae3))));
-                  default:
-                    return ListView.builder(
-                      itemCount: snapshot.data.documents.length,
-                      controller: _scrollController,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: <Widget>[
-                            ListTile(
-                              onTap: () async {
-                                print('${snapshot.data.documents[index].data}');
-                                print('extenal directory: $directory');
-                                File chk = File(directory.path +
-                                    '/${snapshot.data.documents[index].data['timestamp']}.m4a');
-                                if (chk.existsSync()) {
-                                  print('file exist: ${chk.path}');
-                                  playRecording(chk);
-                                } else {
-                                  print('file not exist: ${chk.path}');
-                                  try {
-                                    await downloadRecording(
-                                        chk,
-                                        snapshot.data.documents[index]
-                                            .data['timestamp']);
-                                    print(
-                                        '${snapshot.data.documents[index].data['timestamp']}:File downloded succeessfully.');
-                                    //now play
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                      return Center(
+                          child: CircularProgressIndicator(
+                              valueColor: new AlwaysStoppedAnimation<Color>(
+                                  Color(0xffb00bae3))));
+                    default:
+                      return ListView.builder(
+                        itemCount: snapshot.data.documents.length,
+                        controller: _scrollController,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: <Widget>[
+                              ListTile(
+                                onTap: () async {
+                                  print(
+                                      '${snapshot.data.documents[index].data}');
+                                  print('extenal directory: $directory');
+                                  File chk = File(directory.path +
+                                      '/${snapshot.data.documents[index].data['timestamp']}.m4a');
+                                  if (chk.existsSync()) {
+                                    print('file exist: ${chk.path}');
                                     playRecording(chk);
-                                  } catch (e) {
-                                    print('download error:$e');
+                                  } else {
+                                    print('file not exist: ${chk.path}');
+                                    try {
+                                      await downloadRecording(
+                                          chk,
+                                          snapshot.data.documents[index]
+                                              .data['timestamp']);
+                                      print(
+                                          '${snapshot.data.documents[index].data['timestamp']}:File downloded succeessfully.');
+                                      //now play
+                                      playRecording(chk);
+                                    } catch (e) {
+                                      print('download error:$e');
+                                    }
                                   }
-                                }
-                              },
-                              leading: Icon(Icons.keyboard_voice),
-                              title: Text('Recording ${index + 1}'),
-                              subtitle: Text(
-                                '${DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.documents[index].data['timestamp'])).toString()}',
-                                textAlign: TextAlign.left,
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.center_focus_strong),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              QrCode(
-                                                  songTimestamp: snapshot
-                                                      .data
-                                                      .documents[index]
-                                                      .data['timestamp'])));
                                 },
+                                leading: Icon(Icons.keyboard_voice),
+                                title: Text('Recording ${index + 1}'),
+                                subtitle: Text(
+                                  '${DateTime.fromMillisecondsSinceEpoch(int.parse(snapshot.data.documents[index].data['timestamp'])).toString()}',
+                                  textAlign: TextAlign.left,
+                                ),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.center_focus_strong),
+                                  onPressed: () {
+                                    if (_isPlaying) {
+                                      stopPlayer();
+                                    }
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                QrCode(
+                                                    songTimestamp: snapshot
+                                                        .data
+                                                        .documents[index]
+                                                        .data['timestamp'])));
+                                  },
+                                ),
                               ),
-                            ),
-                            Divider(
-                              height: 0.0,
-                              indent: 60,
-                            )
-                          ],
-                        );
-                      },
-                    );
-                }
-              },
-            ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(left: 25.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            FloatingActionButton.extended(
-              heroTag: "record",
-              icon: Icon(
-                Icons.keyboard_voice,
-                size: 30,
+                              Divider(
+                                height: 0.0,
+                                indent: 60,
+                              )
+                            ],
+                          );
+                        },
+                      );
+                  }
+                },
               ),
-              label: Text('New Record'),
-              onPressed: () {
-                print('go to record page');
-                if (_isPlaying) {
-                  stopPlayer();
-                }
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => Recording()));
-              },
-            ),
-            FloatingActionButton(
-              heroTag: "scan",
-              child: Icon(
-                Icons.center_focus_strong,
-                size: 40,
+        floatingActionButton: Padding(
+          padding: EdgeInsets.only(left: 25.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              FloatingActionButton.extended(
+                heroTag: "record",
+                icon: Icon(
+                  Icons.keyboard_voice,
+                  size: 30,
+                ),
+                label: Text('New Record'),
+                onPressed: () {
+                  print('go to record page');
+                  if (_isPlaying) {
+                    stopPlayer();
+                  }
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) => Recording()));
+                },
               ),
-              onPressed: () {
-                print('go to scan page');
-                scan();
-              },
-            ),
-          ],
+              FloatingActionButton(
+                heroTag: "scan",
+                child: Icon(
+                  Icons.center_focus_strong,
+                  size: 40,
+                ),
+                onPressed: () {
+                  print('go to scan page');
+                  if (_isPlaying) {
+                    stopPlayer();
+                  }
+                  scan();
+                },
+              ),
+            ],
+          ),
         ),
       ),
+      onWillPop: _onBackPress,
     );
+  }
+
+  Future<bool> _onBackPress() {
+    if (_isPlaying) {
+      stopPlayer();
+    }
+
+    return Future.value(false);
   }
 
   Future downloadRecording(File file, String timestamp) async {
@@ -306,11 +321,14 @@ class _HomeState extends State<Home> {
   }
 
   void playRecording(File file) async {
-    String path = await _flutterSound.startPlayer(file.path);
-    await _flutterSound.setVolume(1.0);
-    print('startPlayer: $path');
-
     try {
+      String path = await _flutterSound.startPlayer(file.path);
+      await _flutterSound.setVolume(1.0);
+      if (path == 'player is already running.') {
+        print('hjhjhj');
+      }
+      print('startPlayer: $path');
+
       _playerSubscription = _flutterSound.onPlayerStateChanged.listen((e) {
         if (e != null) {
           slider_current_position = e.currentPosition;
